@@ -69,6 +69,7 @@ def main():
     if isExistObjectFor(bucketName, objectName):
         print("{name} already exist.".format(name=objectName))
 
+        # Need refactoring...
         print("Delete {objectName}.".format(objectName=objectName))
         s3.delete_object(Bucket=bucketName, Key=objectName)
 
