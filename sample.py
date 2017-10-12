@@ -3,6 +3,7 @@
 import botocore
 import boto3
 import io
+from datetime import datetime
 
 # Refs : https://boto3.readthedocs.io/en/latest/reference/services/s3.html
 
@@ -74,13 +75,15 @@ def main():
         s3.delete_object(Bucket=bucketName, Key=objectName)
 
         print("Re-Upload {objectName} to {bucketName}.".format(bucketName=bucketName, objectName=objectName))
-        with open('./image.jpg', 'rb') as fh:
-            s3.upload_fileobj(fh, bucketName, objectName)
+        uploadObject(bucketName, objectName, './image.jpg')
 
     else:
         print("Upload {objectName} to {bucketName}.".format(bucketName=bucketName, objectName=objectName))
-        with open('./image.jpg', 'rb') as fh:
-            s3.upload_fileobj(fh, bucketName, objectName)
+        uploadObject(bucketName, objectName, './image.jpg')
+
+def uploadObject(bucketName, objectName, path):
+    with open(path, 'rb') as fh:
+        s3.put_object(Body=fh, Bucket=bucketName, Key="image_{name}.jpg".format(name=datetime.now().strftime("%Y%m%d_%H%M%S")))
 
 def isExistObjectFor(bucketName, objectName):
     try:
