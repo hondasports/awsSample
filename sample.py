@@ -4,6 +4,7 @@ import botocore
 import boto3
 import io
 from datetime import datetime
+import s3Uploader
 
 # Refs : https://boto3.readthedocs.io/en/latest/reference/services/s3.html
 
@@ -52,59 +53,24 @@ def main():
     #     if bucket.get('Name') != 'bun-chan-bot-images':
     #         print('Not Found')
 
-    bucketName = 'bun-chan-bot-images'
 
     # if isExistBucketFor(bucketName):
+    # else:
     #     print('Delet bucket...')
     #     response = s3.delete_bucket( Bucket='bun-chan-bot-images')
     #     print(response)
-    # else:
         # print('Create bucket...')
         # response = s3.create_bucket(
         #     Bucket='bun-chan-bot-images',
         #     CreateBucketConfiguration={'LocationConstraint': 'ap-northeast-1'}
         # )
 
-    objectName = 'image.jpg'
+    bucketName = 'bun-chan-bot-images'
+    objectName = "image_{name}.jpg".format(name=datetime.now().strftime("%Y%m%d_%H%M%S"))
 
-    if isExistObjectFor(bucketName, objectName):
-        print("{name} already exist.".format(name=objectName))
+    uploader = s3Uploader.s3Uploader(bucketName, objectName, './image.jpg')
+    uploader.upload()
 
-        # Need refactoring...
-        print("Delete {objectName}.".format(objectName=objectName))
-        s3.delete_object(Bucket=bucketName, Key=objectName)
-
-        print("Re-Upload {objectName} to {bucketName}.".format(bucketName=bucketName, objectName=objectName))
-        uploadObject(bucketName, objectName, './image.jpg')
-
-    else:
-        print("Upload {objectName} to {bucketName}.".format(bucketName=bucketName, objectName=objectName))
-        uploadObject(bucketName, objectName, './image.jpg')
-
-def uploadObject(bucketName, objectName, path):
-    with open(path, 'rb') as fh:
-        s3.put_object(Body=fh, Bucket=bucketName, Key="image_{name}.jpg".format(name=datetime.now().strftime("%Y%m%d_%H%M%S")))
-
-def isExistObjectFor(bucketName, objectName):
-    try:
-        s3.head_object(Bucket=bucketName, Key=objectName)
-        return True
-    except botocore.exceptions.ClientError as e:
-        print(e)
-        return False
-
-def isExistBucketFor(bucketName):
-    try:
-        response = s3.head_bucket(Bucket=bucketName)
-        # response = s3.head_bucket(Bucket='test-lambda-on-java')
-        print(response)
-        return True
-
-    except botocore.exceptions.ClientError as e:
-        print("The {bucketName} does not found".format(bucketName=bucketName))
-        print(e)
-
-        return False
 
 if __name__ == '__main__':
     main()
